@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/time.h>
+#include <cuda.h>
 
 long long getCurrentTime() {
     struct timeval te;
