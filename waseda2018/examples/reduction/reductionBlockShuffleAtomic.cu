@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <cuda.h>
 
 long long getCurrentTime() {
     struct timeval te;
@@ -28,10 +29,10 @@ inline void __cudaSafeCall( cudaError err, const char *file, const int line )
 
 __inline__ __device__ int warpReduceSum(int val) {
     for (int offset = warpSize/2; offset > 0; offset /= 2) {
-#if CUDA_VERSION < 900	
-	val += __shfl_down(val, offset);
+#if CUDA_VERSION >= 9000
+      val += __shfl_down_sync(0xffffffff, val, offset);
 #else
-	val += __shfl_down_sync(0xffffffff, val, offset);
+      val += __shfl_down(val, offset);
 #endif	
     }
     return val;
@@ -132,7 +133,7 @@ main(int argc, char **argv)
     
     for (int repeat = 0; repeat < REPEATS; repeat++) {
 	printf("[Iteration %d]\n", repeat);
-	for (int N = 1024; N < 64 * 1024 * 1024; N = N * 2) {
+	for (int N = 1024; N < 256 * 1024 * 1024; N = N * 2) {
 	    int* A = NULL;
 	    double cpuTime = 0.0;
 	    double gpuOverallTime = 0.0;

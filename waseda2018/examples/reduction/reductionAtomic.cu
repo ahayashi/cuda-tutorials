@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <cuda.h>
 
 long long getCurrentTime()
 {
@@ -104,7 +105,7 @@ int main(int argc, char **argv)
     
     for (int repeat = 0; repeat < REPEATS; repeat++) {
 	printf("[Iteration %d]\n", repeat);
-	for (int N = 1024; N < 64 * 1024 * 1024; N = N * 2) {
+	for (int N = 1024; N < 256 * 1024 * 1024; N = N * 2) {
 	    int* A = NULL;
 	    double cpuTime = 0.0;
 	    double gpuOverallTime = 0.0;
