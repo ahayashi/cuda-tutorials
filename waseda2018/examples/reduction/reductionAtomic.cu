@@ -87,8 +87,8 @@ int ReduceGPU(int *A, int N, double *gpuOverallTime, double *gpuKernelTime)
     cudaEventElapsedTime(&msec, start, stop);
     *gpuKernelTime = msec / 1000;
 
-    cudaSafeCall(cudaFree(dA));
-    cudaSafeCall(cudaFree(dSum));
+    CudaSafeCall(cudaFree(dA));
+    CudaSafeCall(cudaFree(dSum));
 
     return *S;
 }
