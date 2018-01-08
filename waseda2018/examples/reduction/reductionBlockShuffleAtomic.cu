@@ -3,10 +3,11 @@
 #include <sys/time.h>
 #include <cuda.h>
 
-long long getCurrentTime() {
+long long getCurrentTime()
+{
     struct timeval te;
     gettimeofday(&te, NULL); // get current time
-    long long microseconds = te.tv_sec*1000000LL + te.tv_usec; 
+    long long microseconds = te.tv_sec*1000000LL + te.tv_usec;
     return microseconds;
 }
 
@@ -27,7 +28,8 @@ inline void __cudaSafeCall( cudaError err, const char *file, const int line )
     return;
 }
 
-__inline__ __device__ int warpReduceSum(int val) {
+__inline__ __device__ int warpReduceSum(int val)
+{
     for (int offset = warpSize/2; offset > 0; offset /= 2) {
 #if CUDA_VERSION >= 9000
       val += __shfl_down_sync(0xffffffff, val, offset);
@@ -38,15 +40,23 @@ __inline__ __device__ int warpReduceSum(int val) {
     return val;
 }
 
-__inline__ __device__ int blockReduceSum(int val) {
+__inline__ __device__ int blockReduceSum(int val)
+{
+    // Shared memory for 32 partial sums
     static __shared__ int shared[32];
     int lane = threadIdx.x % warpSize;
     int wid = threadIdx.x / warpSize;
+    // Reduction within a warp
     val = warpReduceSum(val);
+    // Write reduced value to shared memory
     if (lane == 0) shared[wid] = val;
+    // Wait for all partial reductions
     __syncthreads();
+    // Read from shared memory only if that warp existed
     val = (threadIdx.x < blockDim.x / warpSize) ? shared[lane] : 0;
-    if (wid==0) val = warpReduceSum(val);
+    // Final reduce within first warp
+    if (wid==0) val = warpReduceSum(val);    
+
     return val;
 }
 
@@ -108,20 +118,20 @@ int ReduceGPU(int *A, int N, double *gpuOverallTime, double *gpuKernelTime)
     // Copy back the data from the host
     CudaSafeCall(cudaMemcpy(S, dSum, 1 * sizeof (int), cudaMemcpyDeviceToHost));
 
+    // Compute the performance numbers
     *gpuOverallTime = (double)(getCurrentTime() - startTime) / 1000000;
-    
     float msec = 0;
     CudaSafeCall(cudaEventElapsedTime(&msec, start, stop));
     *gpuKernelTime = msec / 1000;
 
+    // Cleanup
     CudaSafeCall(cudaFree(dA));
     CudaSafeCall(cudaFree(dSum));
 
     return *S;
 }
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 
     if (argc != 2) {

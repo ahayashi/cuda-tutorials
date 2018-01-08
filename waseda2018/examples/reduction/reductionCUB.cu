@@ -29,15 +29,6 @@ inline void __cudaSafeCall( cudaError err, const char *file, const int line )
     return;
 }
 
-__global__ void reduce(int *A, int *sum, int N)
-{
-    for (int i = blockIdx.x * blockDim.x + threadIdx.x;
-	 i < N;
-	 i += blockDim.x * gridDim.x) {
-	atomicAdd(sum, A[i]);
-    }
-}
-
 int ReduceCPU(int *A, int N, double *cpuTime)
 {
     long long startTime = getCurrentTime();
@@ -59,9 +50,11 @@ int ReduceGPU(int *A, int N, double *gpuOverallTime, double *gpuKernelTime) {
     int *dA;
     int *dSum;
 
+    // Allocate memory on the device
     CudaSafeCall(cudaMalloc(&dA, sizeof(int) * N));
     CudaSafeCall(cudaMalloc(&dSum, sizeof(int) * 1));
-    
+
+    // Copy the data from the host to the device
     CudaSafeCall(cudaMemcpy(dA, A, N * sizeof (int), cudaMemcpyHostToDevice));
     CudaSafeCall(cudaMemset(dSum, 0, sizeof (int)));
 
@@ -70,6 +63,7 @@ int ReduceGPU(int *A, int N, double *gpuOverallTime, double *gpuKernelTime) {
     int* temp_storage=NULL;
     int init = 0;
     cub::DeviceReduce::Reduce(temp_storage, temp_storage_bytes, dA, dSum, N, cub::Sum(), init);
+
     // Allocate temporary storage
     CudaSafeCall(cudaMalloc(&temp_storage, temp_storage_bytes));
     CudaSafeCall(cudaDeviceSynchronize());
@@ -78,28 +72,30 @@ int ReduceGPU(int *A, int N, double *gpuOverallTime, double *gpuKernelTime) {
     CudaSafeCall(cudaEventCreate(&start));
     CudaSafeCall(cudaEventCreate(&stop));    
     CudaSafeCall(cudaEventRecord(start));
-    // Run reduction
+
+    // Invoke the reduction library
     cub::DeviceReduce::Reduce(temp_storage, temp_storage_bytes, dA, dSum, N, cub::Sum(), init);
     CudaSafeCall(cudaEventRecord(stop));
     CudaSafeCall(cudaEventSynchronize(stop));
-
     CudaSafeCall(cudaDeviceSynchronize());
-    CudaSafeCall(cudaMemcpy(S, dSum, 1 * sizeof (int), cudaMemcpyDeviceToHost));
 
-    *gpuOverallTime = (double)(getCurrentTime() - startTime) / 1000000;
+    // Copy back the data from the host
+    CudaSafeCall(cudaMemcpy(S, dSum, 1 * sizeof (int), cudaMemcpyDeviceToHost));
     
+    // Compute the performance numbers
+    *gpuOverallTime = (double)(getCurrentTime() - startTime) / 1000000;   
     float msec = 0;
     CudaSafeCall(cudaEventElapsedTime(&msec, start, stop));
     *gpuKernelTime = msec / 1000;
 
+    // Clenaup
     CudaSafeCall(cudaFree(dA));
     CudaSafeCall(cudaFree(dSum));
 
     return *S;
 }
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 
     if (argc != 2) {

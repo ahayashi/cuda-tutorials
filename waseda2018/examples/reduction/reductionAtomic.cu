@@ -7,7 +7,7 @@ long long getCurrentTime()
 {
     struct timeval te;
     gettimeofday(&te, NULL); // get current time
-    long long  microseconds = te.tv_sec*1000000LL + te.tv_usec; 
+    long long microseconds = te.tv_sec*1000000LL + te.tv_usec;
     return microseconds;
 }
 
@@ -81,12 +81,13 @@ int ReduceGPU(int *A, int N, double *gpuOverallTime, double *gpuKernelTime)
     // Copy back the data from the host
     CudaSafeCall(cudaMemcpy(S, dSum, 1 * sizeof (int), cudaMemcpyDeviceToHost));
 
+    // Compute the performance numbers
     *gpuOverallTime = (double)(getCurrentTime() - startTime) / 1000000;
-    
     float msec = 0;
-    cudaEventElapsedTime(&msec, start, stop);
+    CudaSafeCall(cudaEventElapsedTime(&msec, start, stop));
     *gpuKernelTime = msec / 1000;
 
+    // Cleanup
     CudaSafeCall(cudaFree(dA));
     CudaSafeCall(cudaFree(dSum));
 

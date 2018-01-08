@@ -3,10 +3,11 @@
 #include <sys/time.h>
 #include <cuda.h>
 
-long long getCurrentTime() {
+long long getCurrentTime()
+{
     struct timeval te;
     gettimeofday(&te, NULL); // get current time
-    long long microseconds = te.tv_sec*1000000LL + te.tv_usec; 
+    long long microseconds = te.tv_sec*1000000LL + te.tv_usec;
     return microseconds;
 }
 
@@ -27,7 +28,8 @@ inline void __cudaSafeCall( cudaError err, const char *file, const int line )
     return;
 }
 
-__inline__ __device__ int warpReduceSum(int val) {
+__inline__ __device__ int warpReduceSum(int val)
+{
     for (int offset = warpSize/2; offset > 0; offset /= 2) {
 #if CUDA_VERSION >= 9000
       val += __shfl_down_sync(0xffffffff, val, offset);
@@ -97,20 +99,20 @@ int ReduceGPU(int *A, int N, double *gpuOverallTime, double *gpuKernelTime)
     // Copy back the data from the host
     CudaSafeCall(cudaMemcpy(S, dSum, 1 * sizeof (int), cudaMemcpyDeviceToHost));
 
+    // Compute the performance numbers
     *gpuOverallTime = (double)(getCurrentTime() - startTime) / 1000000;
-    
     float msec = 0;
     CudaSafeCall(cudaEventElapsedTime(&msec, start, stop));
     *gpuKernelTime = msec / 1000;
 
+    // Cleanup
     CudaSafeCall(cudaFree(dA));
     CudaSafeCall(cudaFree(dSum));
 
     return *S;
 }
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 
     if (argc != 2) {

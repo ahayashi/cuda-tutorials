@@ -2,7 +2,8 @@
 #include <sys/time.h>
 #include <cuda.h>
 
-long long getCurrentTime() {
+long long getCurrentTime()
+{
     struct timeval te;
     gettimeofday(&te, NULL); // get current time
     long long microseconds = te.tv_sec*1000000LL + te.tv_usec; 
@@ -35,33 +36,42 @@ __global__ void assign(int *A, int streamId)
     }
 }
 
-int
-main()
+int main()
 {
     cudaStream_t streams[4];
     int *A[4], *dA[4];
     int N = 1024*1024;
 
+    // Initialization
     for (int i = 0; i < 4; i++) {
 	CudaSafeCall(cudaStreamCreate(&streams[i]));
 	CudaSafeCall(cudaMallocHost((void**)&A[i], sizeof(int) * N));
 	CudaSafeCall(cudaMalloc(&dA[i], N * sizeof(int)));
     }
+
+    // Asynchronous H2D copies
     for (int i = 0; i < 4; i++) {
 	CudaSafeCall(cudaMemcpyAsync(dA[i], A[i], N * sizeof(int),
 				     cudaMemcpyHostToDevice, streams[i]));
     }
+
+    // Asynchronous kernel launches
     for (int i = 0; i < 4; i++) {
 	assign<<<1, 1024, 0, streams[i]>>>(dA[i], i);
     }
+
+    // Asynchronous D2H copies
     for (int i = 0; i < 4; i++) {
 	CudaSafeCall(cudaMemcpyAsync(A[i], dA[i], N * sizeof(int),
 				     cudaMemcpyDeviceToHost, streams[i]));
     }
 
+    // Synchronization
     for (int i = 0; i < 4; i++) {
 	CudaSafeCall(cudaStreamSynchronize(streams[i]));
     }
+
+    // Verification
     int error = 0;
     for (int i = 0; i < 4; i++) {
 	for (int j = 0; j < N; j++) {
