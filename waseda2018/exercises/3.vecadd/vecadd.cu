@@ -31,8 +31,7 @@ __global__ void vecadd()
     int i = blockIdx.x * blockDim.x + threadIdx.x;
 }
 
-int
-main()
+int main()
 {
 
     // Step 1: Allocate memory on the host (use malloc)

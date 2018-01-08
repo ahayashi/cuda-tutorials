@@ -6,8 +6,7 @@ __global__ void hello()
     printf("Hello\n");
 }
 
-int
-main()
+int main()
 {
     hello<<<1,1>>>();    
     cudaDeviceSynchronize();

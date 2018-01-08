@@ -24,8 +24,7 @@ __global__ void forall(int *dA)
     dA[i] = 1;
 }
 
-int
-main()
+int main()
 {
 
     // Step 1: Allocate memory on the host (use malloc)

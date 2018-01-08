@@ -1,5 +1,5 @@
 NVCC=nvcc
-ARCH=sm_30
+ARCH=sm_37
 
 all: forall
 
