@@ -84,15 +84,14 @@ int ReduceGPU(int *A, int N, double *gpuOverallTime, double *gpuKernelTime)
     CudaSafeCall(cudaMemset(dSum, 0, sizeof (int)));
     
     cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
+    CudaSafeCall(cudaEventCreate(&start));
+    CudaSafeCall(cudaEventCreate(&stop));
 
     // Launch the kernel
-    cudaEventRecord(start);
+    CudaSafeCall(cudaEventRecord(start));
     reduce<<<blocks, threads>>>(dA, dSum, N);
-    cudaEventRecord(stop);
-    cudaEventSynchronize(stop);
-    CudaSafeCall(cudaGetLastError());
+    CudaSafeCall(cudaEventRecord(stop));
+    CudaSafeCall(cudaEventSynchronize(stop));
     CudaSafeCall(cudaDeviceSynchronize());
 
     // Copy back the data from the host
@@ -101,11 +100,11 @@ int ReduceGPU(int *A, int N, double *gpuOverallTime, double *gpuKernelTime)
     *gpuOverallTime = (double)(getCurrentTime() - startTime) / 1000000;
     
     float msec = 0;
-    cudaEventElapsedTime(&msec, start, stop);
+    CudaSafeCall(cudaEventElapsedTime(&msec, start, stop));
     *gpuKernelTime = msec / 1000;
 
-    cudaFree(dA);
-    cudaFree(dSum);
+    CudaSafeCall(cudaFree(dA));
+    CudaSafeCall(cudaFree(dSum));
 
     return *S;
 }

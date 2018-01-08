@@ -71,18 +71,17 @@ int ReduceGPU(int *A, int N, double *gpuOverallTime, double *gpuKernelTime) {
     int init = 0;
     cub::DeviceReduce::Reduce(temp_storage, temp_storage_bytes, dA, dSum, N, cub::Sum(), init);
     // Allocate temporary storage
-    cudaMalloc(&temp_storage, temp_storage_bytes);
-    cudaDeviceSynchronize();
+    CudaSafeCall(cudaMalloc(&temp_storage, temp_storage_bytes));
+    CudaSafeCall(cudaDeviceSynchronize());
     
     cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);    
-    cudaEventRecord(start);
+    CudaSafeCall(cudaEventCreate(&start));
+    CudaSafeCall(cudaEventCreate(&stop));    
+    CudaSafeCall(cudaEventRecord(start));
     // Run reduction
     cub::DeviceReduce::Reduce(temp_storage, temp_storage_bytes, dA, dSum, N, cub::Sum(), init);
-    cudaEventRecord(stop);
-    cudaEventSynchronize(stop);
-    CudaSafeCall(cudaGetLastError());
+    CudaSafeCall(cudaEventRecord(stop));
+    CudaSafeCall(cudaEventSynchronize(stop));
 
     CudaSafeCall(cudaDeviceSynchronize());
     CudaSafeCall(cudaMemcpy(S, dSum, 1 * sizeof (int), cudaMemcpyDeviceToHost));
@@ -90,11 +89,11 @@ int ReduceGPU(int *A, int N, double *gpuOverallTime, double *gpuKernelTime) {
     *gpuOverallTime = (double)(getCurrentTime() - startTime) / 1000000;
     
     float msec = 0;
-    cudaEventElapsedTime(&msec, start, stop);
+    CudaSafeCall(cudaEventElapsedTime(&msec, start, stop));
     *gpuKernelTime = msec / 1000;
 
-    cudaFree(dA);
-    cudaFree(dSum);
+    CudaSafeCall(cudaFree(dA));
+    CudaSafeCall(cudaFree(dSum));
 
     return *S;
 }

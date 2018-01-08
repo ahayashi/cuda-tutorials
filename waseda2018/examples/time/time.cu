@@ -47,15 +47,15 @@ main()
     cudaEvent_t startCudaKernelEvent, endCudaKernelEvent;
     cudaEvent_t startCudaMemcpyD2HEvent, endCudaMemcpyD2HEvent;
     float msecTmp;
-
-    cudaEventCreate(&startCudaMallocEvent);
-    cudaEventCreate(&endCudaMallocEvent);
-    cudaEventCreate(&startCudaMemcpyH2DEvent);
-    cudaEventCreate(&endCudaMemcpyH2DEvent);
-    cudaEventCreate(&startCudaKernelEvent);
-    cudaEventCreate(&endCudaKernelEvent);
-    cudaEventCreate(&startCudaMemcpyD2HEvent);
-    cudaEventCreate(&endCudaMemcpyD2HEvent);
+    
+    CudaSafeCall(cudaEventCreate(&startCudaMallocEvent));
+    CudaSafeCall(cudaEventCreate(&endCudaMallocEvent));
+    CudaSafeCall(cudaEventCreate(&startCudaMemcpyH2DEvent));
+    CudaSafeCall(cudaEventCreate(&endCudaMemcpyH2DEvent));
+    CudaSafeCall(cudaEventCreate(&startCudaKernelEvent));
+    CudaSafeCall(cudaEventCreate(&endCudaKernelEvent));
+    CudaSafeCall(cudaEventCreate(&startCudaMemcpyD2HEvent));
+    CudaSafeCall(cudaEventCreate(&endCudaMemcpyD2HEvent));
             
     // Step 1: Allocate memory on the host (use malloc)
     A = (int*)malloc(sizeof(int) * N);
@@ -67,46 +67,53 @@ main()
 
     // Step 2: Allocate memory on the device (use cudaMalloc)
     startCudaMalloc = getCurrentTime();
-    cudaEventRecord(startCudaMallocEvent);
-    CudaSafeCall(cudaMalloc(&dA, sizeof(int) * N));
-    CudaSafeCall(cudaMalloc(&dB, sizeof(int) * N));
-    cudaEventRecord(endCudaMallocEvent);
+    {
+	CudaSafeCall(cudaEventRecord(startCudaMallocEvent));
+	CudaSafeCall(cudaMalloc(&dA, sizeof(int) * N));
+	CudaSafeCall(cudaMalloc(&dB, sizeof(int) * N));
+	CudaSafeCall(cudaEventRecord(endCudaMallocEvent));
+	CudaSafeCall(cudaEventSynchronize(endCudaMallocEvent));
+    }
     endCudaMalloc = getCurrentTime();
-    cudaEventSynchronize(endCudaMallocEvent);
-    cudaEventElapsedTime(&msecTmp, startCudaMallocEvent, endCudaMallocEvent);
+    CudaSafeCall(cudaEventElapsedTime(&msecTmp, startCudaMallocEvent, endCudaMallocEvent));
     printf("cudaMalloc, getCurrentTime = %lf msec, cudaEventElapsedTime = %lf msec\n", (float)(endCudaMalloc-startCudaMalloc)/1000, msecTmp);
     
     // Step 3: Copy the host data to the device (use cudaMemcpy) 
     startCudaMemcpyH2D = getCurrentTime();
-    cudaEventRecord(startCudaMemcpyH2DEvent);
-    CudaSafeCall(cudaMemcpy(dA, A, sizeof(int) * N, cudaMemcpyHostToDevice));
-    CudaSafeCall(cudaMemcpy(dB, B, sizeof(int) * N, cudaMemcpyHostToDevice));
-    cudaEventRecord(endCudaMemcpyH2DEvent);
+    {
+	CudaSafeCall(cudaEventRecord(startCudaMemcpyH2DEvent));
+	CudaSafeCall(cudaMemcpy(dA, A, sizeof(int) * N, cudaMemcpyHostToDevice));
+	CudaSafeCall(cudaMemcpy(dB, B, sizeof(int) * N, cudaMemcpyHostToDevice));
+	CudaSafeCall(cudaEventRecord(endCudaMemcpyH2DEvent));
+	CudaSafeCall(cudaEventSynchronize(endCudaMemcpyH2DEvent));
+    }
     endCudaMemcpyH2D = getCurrentTime();
-    cudaEventSynchronize(endCudaMemcpyH2DEvent);
-    cudaEventElapsedTime(&msecTmp, startCudaMemcpyH2DEvent, endCudaMemcpyH2DEvent);
+    CudaSafeCall(cudaEventElapsedTime(&msecTmp, startCudaMemcpyH2DEvent, endCudaMemcpyH2DEvent));
     printf("cudaMemcpy, getCurrentTime = %lf msec, cudaEventElapsedTime = %lf msec\n", (float)(endCudaMemcpyH2D-startCudaMemcpyH2D)/1000, msecTmp);
     
     // Step 4: Launch the kernel
-    startCudaKernel = getCurrentTime();    
-    cudaEventRecord(startCudaKernelEvent);
-    assign<<<N/1024,1024>>>(dA, dB);
-    cudaEventRecord(endCudaKernelEvent);
-    CudaSafeCall(cudaGetLastError());
-    cudaEventSynchronize(endCudaKernelEvent);
-    cudaDeviceSynchronize();
+    startCudaKernel = getCurrentTime();
+    {
+	CudaSafeCall(cudaEventRecord(startCudaKernelEvent));
+	assign<<<N/1024,1024>>>(dA, dB);
+	CudaSafeCall(cudaEventRecord(endCudaKernelEvent));
+	CudaSafeCall(cudaEventSynchronize(endCudaKernelEvent));
+	CudaSafeCall(cudaDeviceSynchronize());
+    }
     endCudaKernel = getCurrentTime();
-    cudaEventElapsedTime(&msecTmp, startCudaKernelEvent, endCudaKernelEvent);
+    CudaSafeCall(cudaEventElapsedTime(&msecTmp, startCudaKernelEvent, endCudaKernelEvent));
     printf("launch, getCurrentTime = %lf msec, cudaEventElapsedTime = %lf msec\n", (float)(endCudaKernel-startCudaKernel)/1000, msecTmp);
-    
-    startCudaMemcpyD2H = getCurrentTime();
-    cudaEventRecord(startCudaMemcpyD2HEvent);
+
     // Step 5: Copy back the data from the device (use cudaMemcpy)
-    CudaSafeCall(cudaMemcpy(A, dA, sizeof(int) * N, cudaMemcpyDeviceToHost));
-    cudaEventRecord(endCudaMemcpyD2HEvent);
+    startCudaMemcpyD2H = getCurrentTime();
+    {
+	CudaSafeCall(cudaEventRecord(startCudaMemcpyD2HEvent));
+	CudaSafeCall(cudaMemcpy(A, dA, sizeof(int) * N, cudaMemcpyDeviceToHost));
+	CudaSafeCall(cudaEventRecord(endCudaMemcpyD2HEvent));
+	CudaSafeCall(cudaEventSynchronize(endCudaMemcpyD2HEvent));
+    }
     endCudaMemcpyD2H = getCurrentTime();
-    cudaEventSynchronize(endCudaMemcpyD2HEvent);
-    cudaEventElapsedTime(&msecTmp, startCudaMemcpyD2HEvent, endCudaMemcpyD2HEvent);
+    CudaSafeCall(cudaEventElapsedTime(&msecTmp, startCudaMemcpyD2HEvent, endCudaMemcpyD2HEvent));
     printf("cudaMemcpy, getCurrentTime = %lf msec, cudaEventElapsedTime = %lf msec\n", (float)(endCudaMemcpyD2H-startCudaMemcpyD2H)/1000, msecTmp);
     
     // Step 6: Verification

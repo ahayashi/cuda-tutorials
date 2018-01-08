@@ -36,8 +36,7 @@ main()
 
     // Step 4: Launch the kernel
     forall<<<1,1>>>();
-    CudaSafeCall(cudaGetLastError());
-    cudaDeviceSynchronize();
+    CudaSafeCall(cudaDeviceSynchronize());
 
     // Step 5: Copy back the data from the device (use cudaMemcpy)
 

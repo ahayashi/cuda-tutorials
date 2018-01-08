@@ -42,9 +42,8 @@ main()
     // Step 3: Copy the host data to the device (use cudaMemcpy) 
 
     // Step 4: Launch the kernel
-    vecadd<<<1,1>>>();
-    CudaSafeCall(cudaGetLastError());
-    cudaDeviceSynchronize();
+    vecadd<<<1,1>>>();    
+    CudaSafeCall(cudaDeviceSynchronize());
 
     // Step 5: Copy back the data from the device (use cudaMemcpy)
 
