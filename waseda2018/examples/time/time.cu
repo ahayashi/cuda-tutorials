@@ -74,7 +74,7 @@ main()
     endCudaMalloc = getCurrentTime();
     cudaEventSynchronize(endCudaMallocEvent);
     cudaEventElapsedTime(&msecTmp, startCudaMallocEvent, endCudaMallocEvent);
-    printf("cudaMalloc, getCurrentTime = %lld usec, cudaEventElapsedTime = %lld usec\n", (endCudaMalloc-startCudaMalloc), (long long)(msecTmp*1000));
+    printf("cudaMalloc, getCurrentTime = %lf msec, cudaEventElapsedTime = %lf msec\n", (float)(endCudaMalloc-startCudaMalloc)/1000, msecTmp);
     
     // Step 3: Copy the host data to the device (use cudaMemcpy) 
     startCudaMemcpyH2D = getCurrentTime();
@@ -85,7 +85,7 @@ main()
     endCudaMemcpyH2D = getCurrentTime();
     cudaEventSynchronize(endCudaMemcpyH2DEvent);
     cudaEventElapsedTime(&msecTmp, startCudaMemcpyH2DEvent, endCudaMemcpyH2DEvent);
-    printf("cudaMemcpy, getCurrentTime = %lld usec, cudaEventElapsedTime = %lld usec\n", (endCudaMemcpyH2D-startCudaMemcpyH2D), (long long)(msecTmp*1000));
+    printf("cudaMemcpy, getCurrentTime = %lf msec, cudaEventElapsedTime = %lf msec\n", (float)(endCudaMemcpyH2D-startCudaMemcpyH2D)/1000, msecTmp);
     
     // Step 4: Launch the kernel
     startCudaKernel = getCurrentTime();    
@@ -97,7 +97,7 @@ main()
     cudaDeviceSynchronize();
     endCudaKernel = getCurrentTime();
     cudaEventElapsedTime(&msecTmp, startCudaKernelEvent, endCudaKernelEvent);
-    printf("launch, getCurrentTime = %lld usec, cudaEventElapsedTime = %lld usec\n", (endCudaKernel-startCudaKernel), (long long)(msecTmp*1000));
+    printf("launch, getCurrentTime = %lf msec, cudaEventElapsedTime = %lf msec\n", (float)(endCudaKernel-startCudaKernel)/1000, msecTmp);
     
     startCudaMemcpyD2H = getCurrentTime();
     cudaEventRecord(startCudaMemcpyD2HEvent);
@@ -107,7 +107,7 @@ main()
     endCudaMemcpyD2H = getCurrentTime();
     cudaEventSynchronize(endCudaMemcpyD2HEvent);
     cudaEventElapsedTime(&msecTmp, startCudaMemcpyD2HEvent, endCudaMemcpyD2HEvent);
-    printf("cudaMemcpy, getCurrentTime = %lld usec, cudaEventElapsedTime = %lld usec\n", (endCudaMemcpyD2H-startCudaMemcpyD2H), (long long)(msecTmp*1000));
+    printf("cudaMemcpy, getCurrentTime = %lf msec, cudaEventElapsedTime = %lf msec\n", (float)(endCudaMemcpyD2H-startCudaMemcpyD2H)/1000, msecTmp);
     
     // Step 6: Verification
     int error = 0;
