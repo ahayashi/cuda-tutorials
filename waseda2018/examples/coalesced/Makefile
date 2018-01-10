@@ -8,4 +8,4 @@ coalesced: coalesced.cu
 
 .PHONY: clean
 clean:
-	rm time
+	rm coalesced
