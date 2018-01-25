@@ -15,8 +15,9 @@ float RandFloat(float low, float high)
     return (1.0f - t) * low + t * high;
 }
 
-#define NDOCS 10
-#define NITERS 1
+#define NDOCS 1024
+#define NITERS 5
+/* DO NOT CHANGE NDIMS */
 #define NDIMS 2
 
 int main(int argc, char **argv)
@@ -51,8 +52,8 @@ int main(int argc, char **argv)
     }
 
     // Computation
-    long long start = getCurrentTime();
     for (int iter = 0; iter < NITERS; iter++) {
+	long long start = getCurrentTime();
 	for (int l = 0; l < nLinks; l++) {
 	    link_weights[l] = ranks[links[l*NDIMS+0]] / (float) link_counts[links[l*NDIMS+0]];
 	}
@@ -67,15 +68,17 @@ int main(int argc, char **argv)
 	    }
 	    ranks[d] = new_rank;
 	}
+	long long end = getCurrentTime();
+	printf("Elapsed time: %lld usec\n", (end-start));
     }
-    long long end = getCurrentTime();
-
+    
+    
     // Print results
     printf("nDocs : %d\n", NDOCS);
     printf("nLinks : %d\n", nLinks);
-    for (int d = 0; d < NDOCS; d++) {
-	printf("ranks[%d] = %lf\n", d, ranks[d]);
+    for (int d = 0; d < 4; d++) {
+	printf("ranks[%d] = %lf, ", d, ranks[d]);
     }
-    printf("Elapsed time: %lld usec\n", (end-start));
+    printf("\n");
     
 }    
