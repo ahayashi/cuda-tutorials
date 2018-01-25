@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 		    count++;
 		}
 	    }
-	    for (int d = 0; d < NCLUSTERS; d++) {
+	    for (int d = 0; d < NDIMS; d++) {
 		centers[c][d] = centers[c][d] / (double)count;
 	    }
 	}
