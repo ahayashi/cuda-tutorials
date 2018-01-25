@@ -8,7 +8,7 @@ long long getCurrentTime() {
     return microseconds;
 }
 
-#define N 4
+#define N 1024
 
 int main(int argc, char **argv)
 {
@@ -27,24 +27,29 @@ int main(int argc, char **argv)
     }
 
     // Computation
-    long long start = getCurrentTime();
-    for (i = 0; i < N; i++) {
+    for (int iter = 0; iter < 5; iter++) {
+      for (i = 0; i < N; i++) {
 	for (j = 0; j < N; j++) {
-	    for (k = 0; k < N; k++) {
-		A[i][j] += B[i][k] * C[k][j];
-	    }
+	  A[i][j] = 0;
 	}
+      }
+      long long start = getCurrentTime();
+      for (i = 0; i < N; i++) {
+	for (j = 0; j < N; j++) {
+	  for (k = 0; k < N; k++) {
+	    A[i][j] += B[i][k] * C[k][j];
+	  }
+	}
+      }
+      long long end = getCurrentTime();
+      printf("Elapsed time: %lld usec\n", (end-start));
     }
-    long long end = getCurrentTime();
 
     // Print results
-    for (i = 0; i < N; i++) {
-	for (j = 0; j < N; j++) {
-	    printf("%d, ", A[i][j]);
+    for (i = 0; i < 4; i++) {
+	for (j = 0; j < 4; j++) {
+	  fprintf(stderr, "%d, ", A[i][j]);
 	}
-	printf("\n");
+	fprintf(stderr,"\n");
     }
-
-    printf("Elapsed time: %lld usec\n", (end-start));
-    
 }    
