@@ -11,7 +11,7 @@ long long getCurrentTime()
     return microseconds;
 }
 
-#define N 100
+#define N 65536
 
 static float CND(float d)
 {
@@ -57,8 +57,9 @@ int main(int argc, char **argv)
     }
 
     // Computation
-    long long start = getCurrentTime();
-    for (int i = 0; i < N; i++) {
+    for (int k = 0; k < 5; k++) {
+      long long start = getCurrentTime();
+      for (int i = 0; i < N; i++) {
 	float S = price[i], X = optS[i], T = optY[i], R = 0.02f, V = 0.30f;
 	
 	float sqrtT = sqrtf(T);
@@ -71,20 +72,20 @@ int main(int argc, char **argv)
 	float expRT = expf(- R * T);
 	call[i]   = (float)(S * CNDD1 - X * expRT * CNDD2);
 	put[i]    = (float)(X * expRT * (1.0 - CNDD2) - S * (1.0 - CNDD1));
-    }    
-    long long end = getCurrentTime();
-
+      }    
+      long long end = getCurrentTime();
+      printf("Elapsed time: %lld usec\n", (end-start));
+    }
     // Print results
     printf("Call : ");
-    for (i = 0; i < N; i++) {
+    for (i = 0; i < 10; i++) {
 	printf("%f, ", call[i]);
     }
     printf("\nPut : ");
-    for (i = 0; i < N; i++) {
+    for (i = 0; i < 10; i++) {
 	printf("%f, ", put[i]);
     }
     printf("\n");	
 
-    printf("Elapsed time: %lld usec\n", (end-start));
     
 }    
