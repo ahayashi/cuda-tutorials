@@ -16,10 +16,10 @@ float RandFloat(float low, float high)
     return (1.0f - t) * low + t * high;
 }
 
-#define NPOINTS 15
+#define NPOINTS 65536
 #define NCLUSTERS 3
 #define NDIMS 1
-#define NITERS 10
+#define NITERS 5
 
 int main(int argc, char **argv)
 {
@@ -40,8 +40,8 @@ int main(int argc, char **argv)
     }
 
     // Computation
-    long long start = getCurrentTime();
     for (int iter = 0; iter < NITERS; iter++) {
+	long long start = getCurrentTime();
 	for (int p = 0; p < NPOINTS; p++) {
 	    int bestCluster = 0;
 	    float bestDistance = 0;
@@ -76,17 +76,16 @@ int main(int argc, char **argv)
 		centers[c][d] = centers[c][d] / (double)count;
 	    }
 	}
+	long long end = getCurrentTime();
+	printf("Elapsed time: %lld usec\n", (end-start));
     }
-    long long end = getCurrentTime();
 
     // Print results
     printf("nPoints : %d\n", NPOINTS);
     printf("nClusters : %d\n", NCLUSTERS);
     printf("nDimensions : %d\n", NDIMS);
-    for (int p = 0; p < NPOINTS; p++) {
-	printf("Point %d : %d\n", p, classifications[p]);
+    for (int p = 0; p < 10; p++) {
+	printf("P%d : %d, ", p, classifications[p]);
     }
-
-    printf("Elapsed time: %lld usec\n", (end-start));
-    
+    printf("\n");    
 }    
