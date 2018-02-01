@@ -88,7 +88,7 @@ __global__ void reduce(int *A, int *sum, int N)
     cg::sync(grid);
     
     if (grid.thread_rank() == 0) {
-	for (int block = 0; block < gridDim.x; block++) {
+	for (int block = 1; block < gridDim.x; block++) {
 	    sum[0] += sum[block];
 	}
     }
