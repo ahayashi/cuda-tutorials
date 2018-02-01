@@ -111,7 +111,11 @@ int ReduceGPU(int *A, int N, double *gpuOverallTime, double *gpuKernelTime)
     long long startTime = getCurrentTime();
     
     int threads = 512;
-    int blocks = min((N + threads - 1) / threads, 1024);
+    int numBlocksPerSM;
+    int numSms = 80; // Volta
+    CudaSafeCall(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&numBlocksPerSM, reduce, threads, threads*sizeof(int)));
+
+    int blocks = min((N + threads - 1) / threads, numBlocksPerSM * numSms);
 
     int *S = (int*)malloc(sizeof(int) * 1);
     int *dA;
