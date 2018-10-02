@@ -5,7 +5,7 @@
 long long getCurrentTime() {
     struct timeval te;
     gettimeofday(&te, NULL); // get current time
-    long long microseconds = te.tv_sec*1000000LL + te.tv_usec; 
+    long long microseconds = te.tv_sec*1000000LL + te.tv_usec;
     return microseconds;
 }
 
@@ -14,15 +14,13 @@ long long getCurrentTime() {
 
 inline void __cudaSafeCall( cudaError err, const char *file, const int line )
 {
-    #ifdef CUDA_ERROR_CHECK
-    if ( cudaSuccess != err )
-    {
-	fprintf( stderr, "cudaSafeCall() failed at %s:%i : %s\n",
-		 file, line, cudaGetErrorString( err ) );
-	exit( -1 );
+#ifdef CUDA_ERROR_CHECK
+    if ( cudaSuccess != err ) {
+        fprintf( stderr, "cudaSafeCall() failed at %s:%i : %s\n",
+                 file, line, cudaGetErrorString( err ) );
+        exit( -1 );
     }
-    #endif
-
+#endif
     return;
 }
 
@@ -38,10 +36,10 @@ int main()
 
     // Step 2: Allocate memory on the device (use cudaMalloc)
 
-    // Step 3: Copy the host data to the device (use cudaMemcpy) 
+    // Step 3: Copy the host data to the device (use cudaMemcpy)
 
     // Step 4: Launch the kernel
-    vecadd<<<1,1>>>();    
+    vecadd<<<1,1>>>();
     CudaSafeCall(cudaDeviceSynchronize());
 
     // Step 5: Copy back the data from the device (use cudaMemcpy)
@@ -49,6 +47,6 @@ int main()
     // Step 6: Verification
 
     // Step 7: Cleanup
-    
+
     return 0;
-}    
+}

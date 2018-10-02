@@ -5,7 +5,7 @@
 long long getCurrentTime() {
     struct timeval te;
     gettimeofday(&te, NULL); // get current time
-    long long microseconds = te.tv_sec*1000000LL + te.tv_usec; 
+    long long microseconds = te.tv_sec*1000000LL + te.tv_usec;
     return microseconds;
 }
 
@@ -14,15 +14,13 @@ long long getCurrentTime() {
 
 inline void __cudaSafeCall( cudaError err, const char *file, const int line )
 {
-    #ifdef CUDA_ERROR_CHECK
-    if ( cudaSuccess != err )
-    {
-	fprintf( stderr, "cudaSafeCall() failed at %s:%i : %s\n",
-		 file, line, cudaGetErrorString( err ) );
-	exit( -1 );
+#ifdef CUDA_ERROR_CHECK
+    if (cudaSuccess != err) {
+        fprintf( stderr, "cudaSafeCall() failed at %s:%i : %s\n",
+                 file, line, cudaGetErrorString( err ) );
+        exit( -1 );
     }
-    #endif
-
+#endif
     return;
 }
 
@@ -30,8 +28,8 @@ __global__ void coalesced(int *A, int *B, int N)
 {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < N) {
-	// Coalesced reads and writes
-	A[i] = B[i];
+        // Coalesced reads and writes
+        A[i] = B[i];
     }
 }
 
@@ -39,8 +37,8 @@ __global__ void stride(int *A, int *B, int N)
 {
     int i = (blockIdx.x * blockDim.x + threadIdx.x) * 32;
     if (i < N) {
-	// Stride reads and writes
-	A[i] = B[i];
+        // Stride reads and writes
+        A[i] = B[i];
     }
 }
 
@@ -67,9 +65,9 @@ int main() {
 
     // Clenup
     CudaSafeCall(cudaFree(dA));
-    CudaSafeCall(cudaFree(dB)); 
+    CudaSafeCall(cudaFree(dB));
     free(A);
     free(B);
-    
+
     return 0;
-}    
+}

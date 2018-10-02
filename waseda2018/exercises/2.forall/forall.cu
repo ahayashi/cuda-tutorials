@@ -6,15 +6,13 @@
 
 inline void __cudaSafeCall( cudaError err, const char *file, const int line )
 {
-    #ifdef CUDA_ERROR_CHECK
-    if ( cudaSuccess != err )
-    {
-	fprintf( stderr, "cudaSafeCall() failed at %s:%i : %s\n",
-		 file, line, cudaGetErrorString( err ) );
-	exit( -1 );
+#ifdef CUDA_ERROR_CHECK
+    if ( cudaSuccess != err ) {
+        fprintf( stderr, "cudaSafeCall() failed at %s:%i : %s\n",
+                 file, line, cudaGetErrorString( err ) );
+        exit( -1 );
     }
-    #endif
-
+#endif
     return;
 }
 
@@ -31,7 +29,7 @@ int main()
 
     // Step 2: Allocate memory on the device (use cudaMalloc)
 
-    // Step 3: Copy the host data to the device (use cudaMemcpy) 
+    // Step 3: Copy the host data to the device (use cudaMemcpy)
 
     // Step 4: Launch the kernel
     forall<<<1,1>>>();
@@ -42,6 +40,6 @@ int main()
     // Step 6: Verification
 
     // Step 7: Cleanup
-    
+
     return 0;
-}    
+}

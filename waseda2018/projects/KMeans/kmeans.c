@@ -29,55 +29,55 @@ int main(int argc, char **argv)
 
     // Initialization
     for (int p = 0; p < NPOINTS; p++) {
-	for (int d = 0; d < NDIMS; d++) {
-	    points[p][d] = RandFloat(1.0f, 10.0f);
-	}
+        for (int d = 0; d < NDIMS; d++) {
+            points[p][d] = RandFloat(1.0f, 10.0f);
+        }
     }
     for (int c = 0; c < NCLUSTERS; c++) {
-	for (int d = 0; d < NDIMS; d++) {
-	    centers[c][d] = points[c][d]; // assuming NCLUSTERS <= NPOINTS
-	}
+        for (int d = 0; d < NDIMS; d++) {
+            centers[c][d] = points[c][d]; // assuming NCLUSTERS <= NPOINTS
+        }
     }
 
     // Computation
     for (int iter = 0; iter < NITERS; iter++) {
-	long long start = getCurrentTime();
-	for (int p = 0; p < NPOINTS; p++) {
-	    int bestCluster = 0;
-	    float bestDistance = 0;
-	    
-	    for (int c = 0; c < NCLUSTERS; c++) {
-		float dist = 0.0;
-		for (int d = 0; d < NDIMS; d++) {
-		    double diff = points[p][d] - centers[c][d];
-		    dist += diff * diff;
-		}
-		if (c == 0 || bestDistance > dist) {
-		    bestCluster  = c;
-		    bestDistance = dist;
-		}
-	    }
-	    classifications[p] = bestCluster;
-	}
-	for (int c = 0; c < NCLUSTERS; c++) {
-	    int count = 0;
-	    for (int d = 0; d < NDIMS; d++) {
-		centers[c][d] = 0.0;
-	    }
-	    for (int p = 0; p < NPOINTS; p++) {
-		if (classifications[p] == c) {
-		    for (int d = 0; d < NDIMS; d++) {
-			centers[c][d] += points[p][d];
-		    }
-		    count++;
-		}
-	    }
-	    for (int d = 0; d < NDIMS; d++) {
-		centers[c][d] = centers[c][d] / (double)count;
-	    }
-	}
-	long long end = getCurrentTime();
-	printf("Elapsed time: %lld usec\n", (end-start));
+        long long start = getCurrentTime();
+        for (int p = 0; p < NPOINTS; p++) {
+            int bestCluster = 0;
+            float bestDistance = 0;
+
+            for (int c = 0; c < NCLUSTERS; c++) {
+                float dist = 0.0;
+                for (int d = 0; d < NDIMS; d++) {
+                    double diff = points[p][d] - centers[c][d];
+                    dist += diff * diff;
+                }
+                if (c == 0 || bestDistance > dist) {
+                    bestCluster  = c;
+                    bestDistance = dist;
+                }
+            }
+            classifications[p] = bestCluster;
+        }
+        for (int c = 0; c < NCLUSTERS; c++) {
+            int count = 0;
+            for (int d = 0; d < NDIMS; d++) {
+                centers[c][d] = 0.0;
+            }
+            for (int p = 0; p < NPOINTS; p++) {
+                if (classifications[p] == c) {
+                    for (int d = 0; d < NDIMS; d++) {
+                        centers[c][d] += points[p][d];
+                    }
+                    count++;
+                }
+            }
+            for (int d = 0; d < NDIMS; d++) {
+                centers[c][d] = centers[c][d] / (double)count;
+            }
+        }
+        long long end = getCurrentTime();
+        printf("Elapsed time: %lld usec\n", (end-start));
     }
 
     // Print results
@@ -85,7 +85,7 @@ int main(int argc, char **argv)
     printf("nClusters : %d\n", NCLUSTERS);
     printf("nDimensions : %d\n", NDIMS);
     for (int p = 0; p < 10; p++) {
-	printf("P%d : %d, ", p, classifications[p]);
+        printf("P%d : %d, ", p, classifications[p]);
     }
-    printf("\n");    
-}    
+    printf("\n");
+}
